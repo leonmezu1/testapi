@@ -1,0 +1,26 @@
+require 'rails_helper'
+
+describe ArticlesController do
+  describe '#index' do
+    it 'should return success response' do
+      get :index
+      expect(response).to have_http_status(:ok)
+    end
+
+    it 'should return a proper response' do
+      articles = create_list :article, 2
+      get :index
+      json = JSON.parse(response.body)
+      json_data = json['data']
+      pp json_data
+      articles.each_with_index do |article, index|
+        expect(json_data[index]['attributes'])
+          .to eq({
+                   'title' => article.title,
+                   'content' => article.content,
+                   'slug' => article.slug
+                 })
+      end
+    end
+  end
+end
