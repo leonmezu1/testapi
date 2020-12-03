@@ -12,11 +12,15 @@ class UserAuthenticator
       client_id: Rails.application.credentials.github[:client_id],
       client_secret: Rails.application.credentials.github[:client_secret]
     )
-    res = client.exchange_code_for_token(code)
-    if res.error.present?
+    token = client.exchange_code_for_token(code)
+    res = client.exchange_code_for_token(@code)
+    if res.try(:error).present?
       raise AuthenticationError
     else
-      
+      user_client Octokit::Client.new(
+        access_token: token
+      )
+      user_data = user_client.user
     end
   end
 end
