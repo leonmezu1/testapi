@@ -232,4 +232,21 @@ describe ArticlesController do
       end
     end
   end
+
+  describe 'DELETE #destroy' do
+    let(:user) { create :user }
+    let(:article) { create(:article, user: user) }
+    let(:access_token) { user.create_access_token }
+
+    subject { put :update, params: { id: article.id } }
+
+    context 'When unauthorized' do
+      it_behaves_like 'forbidden_requests'
+    end
+
+    context 'When a invalid code is provided' do
+      before { request.headers['authorization'] = 'Invalid token' }
+      it_behaves_like 'forbidden_requests'
+    end
+  end
 end
