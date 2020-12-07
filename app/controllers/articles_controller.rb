@@ -34,14 +34,10 @@ class ArticlesController < ApplicationController
 
   def destroy
     article = current_user.articles.find(params[:id])
-    Article.destroy(article)
-    render json: {}, status: 204
-  rescue ActiveRecord::RecordNotFound
-    authorization_error
+    article.destroy
+    head :no_content
   rescue StandardError
-    render json: article, adapter: :json_api,
-           serializer: ErrorSerializer,
-           status: :unprocessable_entity
+    authorization_error
   end
 
   private

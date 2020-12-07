@@ -238,7 +238,7 @@ describe ArticlesController do
     let(:article) { create(:article, user: user) }
     let(:access_token) { user.create_access_token }
 
-    subject { put :update, params: { id: article.id } }
+    subject { delete :destroy, params: { id: article.id } }
 
     context 'When unauthorized' do
       it_behaves_like 'forbidden_requests'
@@ -247,6 +247,61 @@ describe ArticlesController do
     context 'When a invalid code is provided' do
       before { request.headers['authorization'] = 'Invalid token' }
       it_behaves_like 'forbidden_requests'
+    end
+
+    context 'When authorized' do
+      before { request.headers['authorization'] = "Bearer #{access_token.token}" }
+
+      context 'When invalid parameters are provided' do
+        let(:invalid_attributes) do
+          {
+            id: 2500
+          }
+        end
+
+        subject { delete :destroy, params: invalid_attributes }
+
+        it 'should return 403 status code' do
+          subject
+          expect(response).to have_http_status(:forbidden)
+        end
+      end
+
+      context 'when successful request sent' do
+        before { request.headers['authorization'] = "Bearer #{access_token.token}" }
+
+        let(:valid_attributes) do
+          {
+            'id': article.id
+          }
+        end
+
+        subject { delete :destroy, params: valid_attributes }
+
+        it 'should have 204 status code' do
+          subject
+          expect(response).to have_http_status(204)
+        end
+
+        it 'should have a empty json body' do
+          subject
+          expect(response.body).to be_blank
+        end
+
+        it 'should destroy the article' do
+          article
+          expect { subject }.to(change { user.articles.count }.by(-1))
+        end
+      end
+
+      context 'when trying to update a not owned article' do
+        let(:other_user) { create :user }
+        let(:other_article) { create(:article, user: other_user) }
+        subject { patch :update, params: { id: other_article.id } }
+        before { request.headers['authorization'] = "Bearer #{access_token.token}" }
+
+        it_behaves_like 'forbidden_requests'
+      end
     end
   end
 end
