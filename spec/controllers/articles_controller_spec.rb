@@ -93,7 +93,6 @@ describe ArticlesController do
 
         it 'should return proper error json' do
           subject
-          pp json['errors']
           expect(json['errors'])
             .to include({
                           'source' => { 'pointer' => '/data/attributes/title' },

@@ -19,6 +19,8 @@ class ArticlesController < ApplicationController
            status: :unprocessable_entity
   end
 
+  def update; end
+
   private
 
   def article_params
