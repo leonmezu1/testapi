@@ -10,7 +10,7 @@ class ArticlesController < ApplicationController
   end
 
   def create
-    article = Article.new(article_params)
+    article = current_user.articles.build(article_params)
     article.save!
     render json: article, status: :created
   rescue StandardError
@@ -19,7 +19,21 @@ class ArticlesController < ApplicationController
            status: :unprocessable_entity
   end
 
-  def update; end
+  def update
+    article = current_user.articles.find(params[:id])
+    article.update!(article_params)
+    # title = params[:data][:attributes][:title]
+    # content = params[:data][:attributes][:content]
+    # article.update(title: title, content: content)
+    article.save!
+    render json: article, status: :created
+  rescue ActiveRecord::RecordNotFound
+    authorization_error
+  rescue StandardError
+    render json: article, adapter: :json_api,
+           serializer: ErrorSerializer,
+           status: :unprocessable_entity
+  end
 
   private
 
