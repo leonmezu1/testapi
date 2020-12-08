@@ -7,4 +7,6 @@ class Article < ApplicationRecord
 
   scope :recent, -> { order(created_at: :desc) }
   scope :older, -> { order(created_at: :asc) }
+
+  has_many :comments, dependent: :destroy
 end
